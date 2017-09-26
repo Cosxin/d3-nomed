@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+<svg>
+</svg>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.10.2/d3.min.js"></script>
+<script>
+
+var raw=
+{
+	"A":[[1,2,4],[1,4,4],[3,2,3],[3,4,3],[5,2,2],[5,4,2]],
+	"B":[[2,2,2],[2,2,3],[4,2,2],[2,4,3],[2,4,2],[2,4,1],[4,4,2]],
+	"C":[[1,2,4],[1,4,4],[3,2,3],[3,4,1]],
+	"D":[[2,2,3],[2,2,2],[2,4,1],[2,4,2],[4,2,2],[3,3,4],[4,4,2]],
+	"E":[[2,2,2],[2,2,3],[2,4,1],[2,4,2],[2,4,3]],
+	"F":[[1,4,4],[3,2,3],[3,2,2],[3,4,3]],
+	"G":[[1,2,4],[1,4,4],[3,2,3],[3,4,1],[4,3,1],[4,5,3]],
+	"H":[[1,2,4],[1,4,4],[3,4,3],[5,2,2],[5,4,2]],
+	"I":[[1,2,4],[3,4,2]],
+	"J":[[1,4,4],[3,2,3],[3,2,4],[3,4,1],[5,4,2]],
+	"K":[[2,2,2],[2,4,3],[2,4,2],[3,1,1],[4,4,2]],
+	"L":[[1,2,4],[1,4,4],[3,4,1]],
+	"M":[[2,2,2],[2,4,2],[3,3,2],[3,3,4],[4,2,4],[4,4,4]],
+	"N":[[1,2,4],[1,4,4],[3,2,2],[4,3,2],[5,2,2],[5,4,2]],
+	"O":[[1,2,4],[1,4,4],[3,2,3],[3,4,1],[5,2,2],[5,4,2]],
+	"P":[[2,2,1],[2,2,2],[2,2,3],[2,4,2],[4,2,2]],
+	"Q":[[1,2,4],[1,4,4],[3,2,3],[3,4,1],[4,5,4],[5,2,2],[5,4,2]],
+	"R":[[2,2,1],[2,2,2],[2,2,3],[2,4,2],[4,2,2],[4,4,2]],
+	"S":[[1,2,4],[3,2,3],[3,4,3],[3,4,1],[5,4,2]],
+	"T":[[2,2,3],[2,2,4],[2,4,4],[4,2,3]],
+	"U":[[1,2,4],[1,4,4],[3,4,1],[5,2,2],[5,4,2]],
+	"V":[[2,2,2],[2,4,3],[2,4,2],[4,2,2]],
+	"W":[[2,2,2],[2,4,2],[3,3,1],[3,5,3],[4,2,4],[4,4,4]],
+	"X":[[1,2,4],[1,4,4],[2,3,4],[4,2,2],[4,4,2]],
+	"Y":[[1,2,4],[2,4,4],[3,2,1],[3,2,4]],
+	"Z":[[2,2,3],[2,4,1],[2,4,4],[4,2,3],[4,2,2],[4,4,1]]
+
+};
+
+var size=18
+var margin = {top: 10, right: 50, bottom: 20, left: 50},
+    width = 1000 - margin.left - margin.right,
+    height = 1000 - margin.top - margin.bottom;
+
+var z = ([x,y,dir])=>
+	dir == 1 ? {"points":x+","+y+" "+(x-1)+","+(y+1)+" "+(x+1)+","+(y+1), "dir":"0,-1"} :
+	dir == 2 ? {"points":x+","+y+" "+(x-1)+","+(y-1)+" "+(x-1)+","+(y+1), "dir":"1,0"} :
+	dir == 3 ? {"points":x+","+y+" "+(x-1)+","+(y-1)+" "+(x+1)+","+(y-1), "dir":"0,1"} :
+	dir == 4 ? {"points":x+","+y+" "+(x+1)+","+(y+1)+" "+(x+1)+","+(y-1), "dir":"-1,0"} :
+	{"points":"","dir":0};
+
+var svg = d3.select('svg')
+	.style("width",width)
+	.style("height",height);
+
+LineCounter = 0;
+
+function println(text){
+	LineCounter++;
+	var text_arr=text.split("").map(d=>raw[d]);
+	var test_json=text_arr.map(d=>d.map(d=>z(d)));
+	var g=svg.selectAll('letter')
+		  .data(test_json)
+		   .enter()
+		   .append('g')
+		   .attr("class","letter")
+		   //.attr("id","ABCD...")? how to add letter id here?
+		 .attr("transform",(d,i) => "scale("+ size + "," + size + ") translate(" + (i * size / 3) + "," + (size * LineCounter / 3) + ")");
+
+	g.selectAll('.triangle')
+	   	 .data(d=>d)
+   	 	  .enter()
+    	 .append('polygon')
+    	 .attr('class','triangle')
+    	 .attr("points", d=>d.points)
+    	 .attr("direction", d=>d.dir);
+
+}
+
+function easeOut(){
+	d3.selectAll('.letter').selectAll('.triangle')
+	  .transition().duration(1000)
+	  .attr('transform', d =>'translate(' + d.dir + ')')
+	  .style('opacity','0.0')
+	  .on('end',function(d,i){d3.select(this.parentNode).remove();});
+}
+</script>
